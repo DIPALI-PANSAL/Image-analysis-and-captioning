@@ -1,9 +1,22 @@
 import streamlit as st
+import subprocess
 import requests
 from PIL import Image
 import io
 
 st.title("Image Captioning Application")
+
+# Function to start the FastAPI server
+def start_api():
+    process = subprocess.Popen(["uvicorn", "api:app", "--host", "127.0.0.1", "--port", "8000"])
+    return process
+
+# Function to stop the FastAPI server
+def stop_api(process):
+    process.terminate()
+
+# Start the FastAPI server
+api_process = start_api()
 
 # Function to get the caption from the FastAPI backend
 def get_caption(image):
@@ -22,7 +35,7 @@ def get_caption(image):
         return "Error in generating caption"
 
 # Upload image
-uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"], key="unique_uploader")
 
 if uploaded_file is not None:
     # Open the image
@@ -36,4 +49,9 @@ if uploaded_file is not None:
     
     # Display the caption
     st.write(f"Caption: {caption}")
+
+# Stop the API when the Streamlit app is closed
+st.write("Stopping API...")
+stop_api(api_process)
+
 
